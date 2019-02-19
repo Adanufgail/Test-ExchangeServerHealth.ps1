@@ -52,16 +52,16 @@ Written by: Paul Cunningham
 
 Find me on:
 
-* My Blog:	http://paulcunningham.me
-* Twitter:	https://twitter.com/paulcunningham
-* LinkedIn:	http://au.linkedin.com/in/cunninghamp/
-* Github:	https://github.com/cunninghamp
+* My Blog:  http://paulcunningham.me
+* Twitter:  https://twitter.com/paulcunningham
+* LinkedIn: http://au.linkedin.com/in/cunninghamp/
+* Github:   https://github.com/cunninghamp
 
 For more Exchange Server tips, tricks and news
 check out Exchange Server Pro.
 
-* Website:	https://practical365.com
-* Twitter:	https://twitter.com/practical365
+* Website:  https://practical365.com
+* Twitter:  https://twitter.com/practical365
 
 Additional Credits (code contributions and testing):
 - Chris Brown, http://twitter.com/chrisbrownie
@@ -110,10 +110,10 @@ V1.04, 19/08/2013 - Added Exchange 2013 compatibility, added option to output a 
 V1.05, 23/08/2013 - Added workaround for Test-ServiceHealth error for Exchange 2013 CAS-only servers
 V1.06, 28/10/2013 - Added workaround for Test-Mailflow error for Exchange 2013 Mailbox servers.
                   - Added workaround for Exchange 2013 mail test.
-				  - Added localization strings for service health check errors for non-English systems.
-				  - Fixed an uptime calculation bug for some regional settings.
-				  - Excluded recovery databases from active database calculation.
-				  - Fixed bug where high transport queues would not count as an alert.
+                  - Added localization strings for service health check errors for non-English systems.
+                  - Fixed an uptime calculation bug for some regional settings.
+                  - Excluded recovery databases from active database calculation.
+                  - Fixed bug where high transport queues would not count as an alert.
                   - Fixed error thrown when Site attribute can't be found for Exchange 2003 servers.
                   - Fixed bug causing Exchange 2003 servers to be added to the report twice.
 V1.07, 24/11/2013 - Fixed bug where disabled content indexes were counted as failed.
@@ -1993,7 +1993,7 @@ if ($ReportMode -or $SendEmail)
                 </style>
                 <body>
                 <h1 align=""center"">Exchange Server Health Check Report</h1>
-                <h3 align=""center"">Generated: $reportime by (hostname)</h3>"
+                <h3 align=""center"">Generated: $reportime by "+(hostname)+"</h3>"
 
     #Check if the server summary has 1 or more entries
     if ($($serversummary.count) -gt 0)
