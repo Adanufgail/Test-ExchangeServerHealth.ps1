@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
 Test-ExchangeServerHealth.ps1 - Exchange Server Health Check Script.
 
@@ -52,10 +52,16 @@ Written by: Paul Cunningham
 
 Find me on:
 
-* My Blog:	https://paulcunningham.me
+* My Blog:	http://paulcunningham.me
 * Twitter:	https://twitter.com/paulcunningham
-* LinkedIn:	https://au.linkedin.com/in/cunninghamp/
+* LinkedIn:	http://au.linkedin.com/in/cunninghamp/
 * Github:	https://github.com/cunninghamp
+
+For more Exchange Server tips, tricks and news
+check out Exchange Server Pro.
+
+* Website:	https://practical365.com
+* Twitter:	https://twitter.com/practical365
 
 Additional Credits (code contributions and testing):
 - Chris Brown, http://twitter.com/chrisbrownie
@@ -188,10 +194,10 @@ $logfile = "$myDir\exchangeserverhealth.log"
 #...................................
 
 $smtpsettings = @{
-    To =  "administrator@exchangeserverpro.net"
-    From = "exchangeserver@exchangeserverpro.net"
+    To =  "administrator@contoso.com"
+    From = "administrator@contoso.com"
     Subject = "$reportemailsubject - $now"
-    SmtpServer = "smtp.exchangeserverpro.net"
+    SmtpServer = "email.contoso.com"
     }
 
 
@@ -309,6 +315,22 @@ Function New-DAGMemberHTMLTableCell()
     {
         $null { $htmltablecell = "<td>n/a</td>" }
         "Passed" { $htmltablecell = "<td class=""pass"">$($line."$lineitem")</td>" }
+        default { $htmltablecell = "<td class=""warn"">$($line."$lineitem")</td>" }
+    }
+    
+    return $htmltablecell
+}
+
+Function New-ClusterNodeHTMLTableCell()
+{
+    param( $lineitem )
+    
+    $htmltablecell = $null
+
+    switch ($($line."$lineitem"))
+    {
+        $null { $htmltablecell = "<td>n/a</td>" }
+        "Online" { $htmltablecell = "<td class=""pass"">$($line."$lineitem")</td>" }
         default { $htmltablecell = "<td class=""warn"">$($line."$lineitem")</td>" }
     }
     
@@ -1913,6 +1935,7 @@ if ($($dags.count) -gt 0)
             </p>"
         }
         
+        #        
         #Output the report objects to console, and optionally to email and HTML file
         #Forcing table format for console output due to issue with multiple output
         #objects that have different layouts
@@ -1943,6 +1966,8 @@ else
 }
 ### End DAG Health Report
 
+
+
 Write-Host $string16
 ### Begin report generation
 if ($ReportMode -or $SendEmail)
@@ -1968,7 +1993,7 @@ if ($ReportMode -or $SendEmail)
                 </style>
                 <body>
                 <h1 align=""center"">Exchange Server Health Check Report</h1>
-                <h3 align=""center"">Generated: $reportime</h3>"
+                <h3 align=""center"">Generated: $reportime by (hostname)</h3>"
 
     #Check if the server summary has 1 or more entries
     if ($($serversummary.count) -gt 0)
@@ -2113,11 +2138,66 @@ if ($ReportMode -or $SendEmail)
     }
 
     $serverhealthhtmltable = $serverhealthhtmltable + "</table></p>"
+### Begin Cluster Reporting ###
+
+    $clusteraddon = "<h3>Cluster Service</h3>"
+    $clusteraddon += "<p><table>"
+    $clusteraddon += "<tr>"
+    $clusteraddon += "<th>Service</th>"
+    $clusteraddon += "<th>Status</th>"
+    $clusteraddon += "</tr>"
+    foreach ($network in (Get-ClusterNode))
+    {
+        $clusteraddon += "<tr>"
+        $clusteraddon+="<td>NODE: <b>"+$network.name+"</b></td>"
+        if($network.state -Match "Up")
+        {
+            $clusteraddon+="<td class=""pass"">"+$network.state+"</td>" 
+        }
+        else
+        {
+            $clusteraddon+="<td class=""fail"">"+$network.state+"</td>" 
+        }
+        $clusteraddon += "</tr>"
+    }
+    foreach ($network in (Get-ClusterNetwork))
+    {
+        $clusteraddon += "<tr>"
+        $clusteraddon+="<td>NETWORK: <b>"+$network.name+"</b></td>"
+        if($network.state -Match "Up")
+        {
+            $clusteraddon+="<td class=""pass"">"+$network.state+"</td>" 
+        }
+        else
+        {
+            $clusteraddon+="<td class=""fail"">"+$network.state+"</td>" 
+        }
+        $clusteraddon += "</tr>"
+    }
+    foreach ($network in (Get-ClusterNetworkInterface))
+    {
+        $clusteraddon += "<tr>"
+        $clusteraddon+="<td>NIC: <b>"+$network.name+"</b></td>"
+        if($network.state -Match "Up")
+        {
+            $clusteraddon+="<td class=""pass"">"+$network.state+"</td>" 
+        }
+        else
+        {
+            $clusteraddon+="<td class=""fail"">"+$network.state+"</td>" 
+        }
+        $clusteraddon += "</tr>"
+    }
+    $clusteraddon += "</table></p>"    
+
+
+### End Cluster Reporting
+
 
     $htmltail = "</body>
                 </html>"
 
-    $htmlreport = $htmlhead + $serversummaryhtml + $dagsummaryhtml + $serverhealthhtmltable + $dagreportbody + $htmltail
+    $htmlreport = $htmlhead + $serversummaryhtml + $dagsummaryhtml + $serverhealthhtmltable + $dagreportbody + $clusteraddon + $htmltail
     
     if ($ReportMode -or $ReportFile)
     {
